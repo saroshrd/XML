@@ -1,29 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 
-namespace ConsoleApplication1
+namespace ConsoleApplication2
 {
-    class box
-    {
-        public int height;
-        public int weight;
-    }
     class Program
     {
-        static void Main(string[] args)
-        {
-            XmlNodeList xnList;
-            
+        public static string mainXML2 = "";
 
-            using (XmlReader reader= XmlReader.Create("C:\\Users\\s1\\Desktop\\ePMO\\New Model\\Diagram 1.bpmn"))
+            static void Main(string[] args)
             {
-                XmlDocument stripXML = new XmlDocument();
+
+            XmlDocument mainXML = new XmlDocument();
+
+            mainXML.Load("C:\\Users\\1392078\\Desktop\\ePMO\\New Model_3\\Diagram 1.bpmn");
+
+            mainXML2 = mainXML.InnerXml.ToString();
+
+            using (XmlReader reader = XmlReader.Create("C:\\Users\\1392078\\Desktop\\ePMO\\New Model_3\\Diagram 1.bpmn"))
+            {
                 while (reader.Read())
                 {
                     if (reader.IsStartElement())
@@ -32,51 +31,73 @@ namespace ConsoleApplication1
                         {
 
                             case "startEvent":
-                                stripXML.LoadXml(stripNS(XElement.Parse(reader.ReadOuterXml())).ToString()); // suppose that myXmlString contains "<Names>...</Names>"
-                                xnList = stripXML.SelectNodes("/startEvent/outgoing");
-                                foreach (XmlNode xn in xnList)
-                                {
-                                    BPMNNodeData.GetBPMNNodeData("startEvent", reader["id"], xn.InnerText, null);
-                                }
+                                setNodeData(reader.ReadOuterXml().ToString());
                                 break;
-                                
+
                             case "endEvent":
-                                stripXML.LoadXml(stripNS(XElement.Parse(reader.ReadOuterXml())).ToString()); // suppose that myXmlString contains "<Names>...</Names>"
-                                xnList = stripXML.SelectNodes("/endEvent/incoming");
-                                foreach (XmlNode xn in xnList)
-                                {
-                                    BPMNNodeData.GetBPMNNodeData("endEvent", reader["id"], null, xn.InnerText);
-                                }
+                                setNodeData(reader.ReadOuterXml().ToString());
+                                break;
+
+                            case "task":
+                                setNodeData(reader.ReadOuterXml().ToString());
+                                break;
+
+                            case "sequenceFlow":
+                                setNodeData(reader.ReadOuterXml().ToString());
+                                sequenceFlowData(reader.ReadOuterXml().ToString());
+                                break;
+
+                            case "exclusiveGateway":
+                                setNodeData(reader.ReadOuterXml().ToString());
                                 break;
                         }
                     }
-                    else 
-                    {
-                        Console.WriteLine(reader.Name);
-                    }
 
                 }
-                
-
-
-                
             }
-
-            Console.WriteLine(BPMNNodeData.lstBPMNNodeData.Count);
-
             Console.ReadLine();
+        }
 
+
+        static void setNodeData(string xmlData) {
+            XmlDocument innerXML = new XmlDocument();
+            innerXML.LoadXml(xmlData);
+
+            XmlElement root = innerXML.DocumentElement;
+            string id = root.Attributes["id"].Value;
+            string name="";
+
+            try
+            {
+                name = root.Attributes["name"].Value;
+            }
+            catch(Exception e)
+            {
+
+            }
+            string TagName = innerXML.DocumentElement.Name;
+
+            string xml = "<parent><f1 id='bar'><foo id='bar2' /><foo id='baz' /></f1></parent>";
+
+
+
+            XDocument doc = XDocument.Parse(mainXML2);
+            string idToFind = "Id_e9cfee48-6117-491d-b6bc-de1ee7d6cd97";
+            XElement selectedElement = doc.Descendants()
+                .Where(x => (string)x.Attribute("id") == idToFind).FirstOrDefault();
+            Console.WriteLine(selectedElement);
+
+
+
+            //Console.WriteLine("--------------");
+            //Console.WriteLine(TagName);
+            //Console.WriteLine(id);
 
         }
 
-        static XElement stripNS(XElement root)
+        static void sequenceFlowData(string xmlData)
         {
-            return new XElement(
-                root.Name.LocalName,
-                root.HasElements ?
-                    root.Elements().Select(el => stripNS(el)) :
-                    (object)root.Value
-            );
+
         }
     }
 
