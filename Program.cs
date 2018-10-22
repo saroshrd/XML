@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,16 +13,16 @@ namespace ConsoleApplication2
     {
         public static string mainXML2 = "";
 
-            static void Main(string[] args)
-            {
+        static void Main(string[] args)
+        {
 
             XmlDocument mainXML = new XmlDocument();
 
-            mainXML.Load("C:\\Users\\1392078\\Desktop\\ePMO\\New Model_3\\Diagram 1.bpmn");
+            mainXML.Load("C:\\Users\\s1\\Desktop\\ePMO\\New Model\\Diagram 1.bpmn");
 
             mainXML2 = mainXML.InnerXml.ToString();
 
-            using (XmlReader reader = XmlReader.Create("C:\\Users\\1392078\\Desktop\\ePMO\\New Model_3\\Diagram 1.bpmn"))
+            using (XmlReader reader = XmlReader.Create("C:\\Users\\s1\\Desktop\\ePMO\\New Model\\Diagram 1.bpmn"))
             {
                 while (reader.Read())
                 {
@@ -44,7 +45,6 @@ namespace ConsoleApplication2
 
                             case "sequenceFlow":
                                 setNodeData(reader.ReadOuterXml().ToString());
-                                sequenceFlowData(reader.ReadOuterXml().ToString());
                                 break;
 
                             case "exclusiveGateway":
@@ -55,51 +55,58 @@ namespace ConsoleApplication2
 
                 }
             }
+
+            Console.WriteLine(BPMNNodeData.lstBPMNNodeData.Count);
+            
+            foreach(BPMNNodeData x1 in BPMNNodeData.lstBPMNNodeData)
+            {
+                Console.WriteLine("name=" + x1.Name +"    "+ "name=" + x1.Category+"    "+ "name=" + x1.BPMNId + "    " + "x=" + x1.XCoordinate + "    "+ "x=" + x1.YCoordinate);
+            }
+
             Console.ReadLine();
         }
 
 
-        static void setNodeData(string xmlData) {
+        static void setNodeData(string xmlData)
+        {
             XmlDocument innerXML = new XmlDocument();
             innerXML.LoadXml(xmlData);
 
             XmlElement root = innerXML.DocumentElement;
             string id = root.Attributes["id"].Value;
-            string name="";
+            string name = "";
 
             try
             {
                 name = root.Attributes["name"].Value;
             }
-            catch(Exception e)
+            catch (Exception e)
             {
 
             }
             string TagName = innerXML.DocumentElement.Name;
 
-            string xml = "<parent><f1 id='bar'><foo id='bar2' /><foo id='baz' /></f1></parent>";
 
-
-
+            XmlDocument doc2 = new XmlDocument();
+            doc2.LoadXml(mainXML2);
             XDocument doc = XDocument.Parse(mainXML2);
-            string idToFind = "Id_e9cfee48-6117-491d-b6bc-de1ee7d6cd97";
+
             XElement selectedElement = doc.Descendants()
-                .Where(x => (string)x.Attribute("id") == idToFind).FirstOrDefault();
-            Console.WriteLine(selectedElement);
+                .Where(x => (string)x.Attribute("bpmnElement") == id).FirstOrDefault();
 
 
-
-            //Console.WriteLine("--------------");
-            //Console.WriteLine(TagName);
-            //Console.WriteLine(id);
-
-        }
-
-        static void sequenceFlowData(string xmlData)
-        {
+            XmlTextReader reader = new XmlTextReader(new StringReader(selectedElement.ToString()));
+            while (reader.Read())
+            {
+                if(reader.Name.ToString()== "Bounds")
+                {
+                    BPMNNodeData.GetBPMNNodeData(id, name, TagName,Int32.Parse(reader["x"]), Int32.Parse(reader["y"]));
+                }
+            }
 
         }
+
     }
-
-
 }
+
+

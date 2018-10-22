@@ -21,10 +21,10 @@ namespace ConsoleApplication2
             lstBPMNNodeData.Add(new BPMNNodeData()
             {
                 BPMNId = UID,
-                Name=name,
+                Name = name,
                 Category = Category,
-                XCoordinate= XCor,
-                YCoordinate= YCor
+                XCoordinate = XCor,
+                YCoordinate = YCor
             });
 
             return lstBPMNNodeData;
